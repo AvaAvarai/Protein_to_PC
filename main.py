@@ -1,6 +1,7 @@
 import pdbreader
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 DATA_FOLDER = "data/"
 PDB_FILE = "1BRS"
@@ -31,9 +32,12 @@ if __name__ == "__main__":
     
     # extract just the atom entries
     atom_df = pdb_data['ATOM']
-    
-    # extract atom names
-    names_df = atom_df['name']
+   
+    # print column names
+    print(list(atom_df.columns))
+
+    # extract residue names
+    names_df = atom_df['resname']
 
     atom_df_numeric = atom_df.select_dtypes(include=['number'])
     atom_df_numeric = atom_df_numeric.drop(['model_id', 'id', 'resid'], axis=1)
@@ -41,6 +45,23 @@ if __name__ == "__main__":
     atom_df_numeric = atom_df_numeric.join(names_df)
 
     print(atom_df_numeric.head())
-    pd.plotting.parallel_coordinates(atom_df_numeric, 'name')
+    print("Number of entries:", len(atom_df_numeric))
+    print("Unique number of entries:", len(atom_df_numeric['resname'].unique()))
+    
+    pd.plotting.parallel_coordinates(atom_df_numeric, 'resname')
+    plt.show()
+
+    # plot x,y,z scatterplot cube
+    atom_df_numeric = atom_df_numeric.drop(['occupancy', 'b_factor'], axis=1)
+    
+    cube = plt.figure().add_subplot(projection='3d')
+    unique_labels = atom_df_numeric['resname'].unique()
+    colors = plt.cm.get_cmap('viridis', len(unique_labels))
+    for i, label in enumerate(unique_labels):
+        subset = atom_df_numeric[atom_df_numeric['resname'] == label]
+        cube.scatter(subset['x'], subset['y'], subset['z'], color=colors(i), label=label, s=50)
+
+
+    #cube.scatter(atom_df_numeric['x'], atom_df_numeric['y'], atom_df_numeric['z'])
     plt.show()
 
