@@ -9,11 +9,14 @@ PDB_FILE = "1BRS"
 if __name__ == "__main__":
     # parse whole pdb file
     pdb_data = pdbreader.read_pdb(DATA_FOLDER + PDB_FILE + ".pdb")
+    
+    # extract just the atom entries
+    atom_df = pdb_data['ATOM']
 
     # The ATOM records present the atomic coordinates for standard amino acids and nucleotides. They also present the occupancy and temperature factor for each atom. Non-polymer chemical coordinates use the HETATM record type. The element symbol is always present on each ATOM record; charge is optional.
     # Record Format
     # COLUMNS        DATA  TYPE    FIELD        DEFINITION
-    # -------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
     #  1 -  6        Record name   "ATOM  "
     #  7 - 11        Integer       serial       Atom  serial number.
     # 13 - 16        Atom          name         Atom name.
@@ -30,9 +33,6 @@ if __name__ == "__main__":
     # 77 - 78        LString(2)    element      Element symbol, right-justified.
     # 79 - 80        LString(2)    charge       Charge  on the atom.
     
-    # extract just the atom entries
-    atom_df = pdb_data['ATOM']
-   
     # print column names
     print(list(atom_df.columns))
 
@@ -51,17 +51,23 @@ if __name__ == "__main__":
     pd.plotting.parallel_coordinates(atom_df_numeric, 'resname')
     plt.show()
 
-    # plot x,y,z scatterplot cube
+    # plot x, y, z scatterplot cube of orthogonal coordinates
     atom_df_numeric = atom_df_numeric.drop(['occupancy', 'b_factor'], axis=1)
     
-    cube = plt.figure().add_subplot(projection='3d')
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
     unique_labels = atom_df_numeric['resname'].unique()
-    colors = plt.cm.get_cmap('viridis', len(unique_labels))
-    for i, label in enumerate(unique_labels):
-        subset = atom_df_numeric[atom_df_numeric['resname'] == label]
-        cube.scatter(subset['x'], subset['y'], subset['z'], color=colors(i), label=label, s=50)
+    colors = plt.get_cmap('viridis', len(unique_labels))
+    
+    scatter = ax.scatter(atom_df_numeric['x'], atom_df_numeric['y'], atom_df_numeric['z'], c=atom_df_numeric['resname'].astype('category').cat.codes, cmap='viridis', s=100, edgecolors='black', linewidths=0.75)
 
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.set_title('3D Scatter Plot with Residue-Based Coloring')
+    
+    cbar = fig.colorbar(scatter, ax=ax, pad=0.1)
+    cbar.set_label('residue') 
 
-    #cube.scatter(atom_df_numeric['x'], atom_df_numeric['y'], atom_df_numeric['z'])
     plt.show()
 
