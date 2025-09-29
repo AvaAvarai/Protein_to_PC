@@ -6,7 +6,9 @@ DATA_FOLDER = "data/"
 PDB_FILE = "1BRS"
 
 if __name__ == "__main__":
+    # parse whole pdb file
     pdb_data = pdbreader.read_pdb(DATA_FOLDER + PDB_FILE + ".pdb")
+
     # The ATOM records present the atomic coordinates for standard amino acids and nucleotides. They also present the occupancy and temperature factor for each atom. Non-polymer chemical coordinates use the HETATM record type. The element symbol is always present on each ATOM record; charge is optional.
     # Record Format
     # COLUMNS        DATA  TYPE    FIELD        DEFINITION
@@ -26,11 +28,19 @@ if __name__ == "__main__":
     # 61 - 66        Real(6.2)     tempFactor   Temperature  factor.
     # 77 - 78        LString(2)    element      Element symbol, right-justified.
     # 79 - 80        LString(2)    charge       Charge  on the atom.
+    
+    # extract just the atom entries
     atom_df = pdb_data['ATOM']
+    
+    # extract atom names
+    names_df = atom_df['name']
+
     atom_df_numeric = atom_df.select_dtypes(include=['number'])
-    atom_df_numeric = atom_df_numeric.drop(['model_id', 'id'], axis=1)
+    atom_df_numeric = atom_df_numeric.drop(['model_id', 'id', 'resid'], axis=1)
     atom_df_numeric = (atom_df_numeric - atom_df_numeric.min())/(atom_df_numeric.max() - atom_df_numeric.min())
+    atom_df_numeric = atom_df_numeric.join(names_df)
+
     print(atom_df_numeric.head())
-    pd.plotting.parallel_coordinates(atom_df_numeric, 'resid')
+    pd.plotting.parallel_coordinates(atom_df_numeric, 'name')
     plt.show()
 
