@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # COLUMNS        DATA  TYPE    FIELD        DEFINITION
     # ------------------------------------------------------------------------------------
     #  1 -  6        Record name   "ATOM  "
-    #  7 - 11        Integer       serial       Atom  serial number.
+    #  7 - 11        Integer       serial       Atom serial number.
     # 13 - 16        Atom          name         Atom name.
     # 17             Character     altLoc       Alternate location indicator.
     # 18 - 20        Residue name  resName      Residue name.
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # 55 - 60        Real(6.2)     occupancy    Occupancy.
     # 61 - 66        Real(6.2)     tempFactor   Temperature  factor.
     # 77 - 78        LString(2)    element      Element symbol, right-justified.
-    # 79 - 80        LString(2)    charge       Charge  on the atom.
+    # 79 - 80        LString(2)    charge       Charge on the atom.
     
     # print column names
     print(list(atom_df.columns))
@@ -59,7 +59,15 @@ if __name__ == "__main__":
     unique_labels = atom_df_numeric['resname'].unique()
     colors = plt.get_cmap('viridis', len(unique_labels))
     
-    scatter = ax.scatter(atom_df_numeric['x'], atom_df_numeric['y'], atom_df_numeric['z'], c=atom_df_numeric['resname'].astype('category').cat.codes, cmap='viridis', s=100, edgecolors='black', linewidths=0.75)
+    scatter = ax.scatter(
+        atom_df_numeric['x'],
+        atom_df_numeric['y'],
+        atom_df_numeric['z'],
+        c=atom_df_numeric['resname'].astype('category').cat.codes,
+        cmap='viridis',
+        s=25,
+        edgecolors='black',
+        linewidths=0.75)
 
     ax.set_xlabel('x')
     ax.set_ylabel('y')
